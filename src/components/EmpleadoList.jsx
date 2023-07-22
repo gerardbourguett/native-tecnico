@@ -15,8 +15,8 @@ const EmpleadoList = () => {
       .catch((error) => console.error("Error fetching empleados:", error));
   }, []);
 
-  const handleLink = (nombreEmpleado) => {
-    navigation.navigate("EmpleadoSubida", { nombreEmpleado });
+  const handleLink = (idEmpleado, nombreEmpleado) => {
+    navigation.navigate("EmpleadoSubida", { idEmpleado, nombreEmpleado });
   };
 
   return (
@@ -32,7 +32,9 @@ const EmpleadoList = () => {
                 textStyle={styles.text}
               />
               <TouchableOpacity
-                onPress={() => handleLink(empleado.nombre_completo)}
+                onPress={() =>
+                  handleLink(empleado.id_empleado, empleado.nombre_completo)
+                }
               >
                 <Text style={styles.link}>Link</Text>
               </TouchableOpacity>

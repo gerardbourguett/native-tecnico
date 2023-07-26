@@ -10,8 +10,9 @@ import {
   Linking,
   TouchableOpacity,
 } from "react-native";
-
 import axios from "axios";
+import { DocumentPicker } from "react-native-document-picker";
+
 const EmpleadoSubida = ({ route }) => {
   const { idEmpleado, nombreEmpleado } = route.params;
   const [loading, setLoading] = useState(true);
@@ -19,9 +20,31 @@ const EmpleadoSubida = ({ route }) => {
   const [nombreArchivo, setNombreArchivo] = useState("");
   const [descripcionArchivo, setDescripcionArchivo] = useState("");
   const [archivosDelEmpleado, setArchivosDelEmpleado] = useState([]);
+
+  const selectDoc = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      console.log(
+        res.uri,
+        res.type, // mime type
+        res.name,
+        res.size
+      );
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log("Canceled");
+      } else {
+        throw err;
+      }
+    }
+  };
+
   useEffect(() => {
     cargarDatos();
   }, []);
+
   const cargarDatos = () => {
     setLoading(true);
     axios
@@ -46,7 +69,7 @@ const EmpleadoSubida = ({ route }) => {
     );
   }
 
-  const handleSubirDatos = () => {
+  /* const handleSubirDatos = () => {
     if (!nombreArchivo || !descripcionArchivo) {
       alert("Por favor, ingresa un nombre y una descripción para el archivo.");
       return;
@@ -70,7 +93,7 @@ const EmpleadoSubida = ({ route }) => {
       .catch((error) => {
         console.error("Error al subir los datos:", error);
       });
-  };
+  }; */
 
   return (
     <View style={styles.container}>

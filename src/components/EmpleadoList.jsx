@@ -9,7 +9,7 @@ const EmpleadoList = () => {
 
   useEffect(() => {
     // Aquí haces la llamada a tu API para obtener los datos de empleados
-    fetch("https://api-nazar-production.up.railway.app/api/empleados/")
+    fetch("https://apirest-production-90e7.up.railway.app/api/empleados/")
       .then((response) => response.json())
       .then((data) => setEmpleados(data))
       .catch((error) => console.error("Error fetching empleados:", error));
@@ -25,15 +25,15 @@ const EmpleadoList = () => {
         <Row data={["Empleado"]} style={styles.head} textStyle={styles.text} />
         <TableWrapper>
           {empleados.map((empleado) => (
-            <TableWrapper key={empleado.id_empleado} style={styles.row}>
+            <TableWrapper key={empleado.id} style={styles.row}>
               <Cell
-                key={empleado.id_empleado}
+                key={empleado.id}
                 data={empleado.nombre_completo}
                 textStyle={styles.text}
               />
               <TouchableOpacity
                 onPress={() =>
-                  handleLink(empleado.id_empleado, empleado.nombre_completo)
+                  handleLink(empleado.id, empleado.nombre_completo)
                 }
               >
                 <Text style={styles.link}>Link</Text>

@@ -7,30 +7,30 @@ import {
   TextInput,
   Button,
   FlatList,
+  Linking,
+  TouchableOpacity,
 } from "react-native";
-import axios from "axios";
 
+import axios from "axios";
 const EmpleadoSubida = ({ route }) => {
   const { idEmpleado, nombreEmpleado } = route.params;
   const [loading, setLoading] = useState(true);
   const [empleadosPorId, setEmpleadosPorId] = useState([]);
   const [nombreArchivo, setNombreArchivo] = useState("");
+  const [descripcionArchivo, setDescripcionArchivo] = useState("");
   const [archivosDelEmpleado, setArchivosDelEmpleado] = useState([]);
-
   useEffect(() => {
     cargarDatos();
   }, []);
-
   const cargarDatos = () => {
     setLoading(true);
-    // Hacemos la solicitud a la API para obtener los empleados con el mismo idEmpleado
     axios
       .get(
         `https://apirest-production-90e7.up.railway.app/api/empleados/${idEmpleado}/archivos/`
       )
       .then((response) => {
         setEmpleadosPorId(response.data);
-        setArchivosDelEmpleado(response.data.archivos);
+        setArchivosDelEmpleado(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -38,7 +38,6 @@ const EmpleadoSubida = ({ route }) => {
         setLoading(false);
       });
   };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -48,17 +47,17 @@ const EmpleadoSubida = ({ route }) => {
   }
 
   const handleSubirDatos = () => {
-    if (!nombreArchivo) {
-      alert("Por favor, ingresa un nombre de archivo.");
+    if (!nombreArchivo || !descripcionArchivo) {
+      alert("Por favor, ingresa un nombre y una descripción para el archivo.");
       return;
     }
-
     const datosData = {
-      id_empleado: idEmpleado,
+      empleado: idEmpleado,
       nombre_archivo: nombreArchivo,
+      descripcion: descripcionArchivo,
+      archivo: "hola.pdf",
+      fecha: new Date().toISOString(),
     };
-
-    // Realizamos la solicitud POST a la API para subir los datos
     axios
       .post(
         "https://apirest-production-90e7.up.railway.app/api/archivos/",
@@ -66,7 +65,7 @@ const EmpleadoSubida = ({ route }) => {
       )
       .then((response) => {
         console.log("Datos subidos correctamente:", response.data);
-        cargarDatos(); // Actualizamos la lista de archivos después de subir los datos
+        cargarDatos();
       })
       .catch((error) => {
         console.error("Error al subir los datos:", error);
@@ -74,33 +73,41 @@ const EmpleadoSubida = ({ route }) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.heading}>EmpleadoSubida</Text>
       <Text>Nombre del empleado: {nombreEmpleado}</Text>
-      <Text>Archivos subidos por el empleado:</Text>
+      <Text style={styles.heading}>Archivos subidos por el empleado:</Text>
       {archivosDelEmpleado.length === 0 ? (
         <Text>No se han subido archivos.</Text>
       ) : (
-        <FlatList
-          data={archivosDelEmpleado}
-          renderItem={({ item }) => <Text>{item.nombre_archivo}</Text>}
-          keyExtractor={(item) => item.id.toString()}
-        />
+        <View style={styles.tableContainer}>
+          {archivosDelEmpleado.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.tableRow}
+              onPress={() =>
+                Linking.openURL(
+                  `https://apirest-production-90e7.up.railway.app${item.archivo}`
+                )
+              }
+            >
+              <Text style={styles.tableCell}>
+                Nombre del archivo: {item.nombre_archivo}
+              </Text>
+              <Text style={styles.tableCellLink}>Ver</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       )}
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre del archivo"
-        value={nombreArchivo}
-        onChangeText={setNombreArchivo}
-      />
-
-      <Button title="Subir datos" onPress={handleSubirDatos} />
     </View>
   );
 };
-
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center", // Center vertically
+    alignItems: "center", // Center horizontally
+  },
   heading: {
     fontSize: 20,
     fontWeight: "bold",
@@ -117,6 +124,34 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  linkText: {
+    color: "blue",
+    textDecorationLine: "underline",
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  tableContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginTop: 10,
+    marginBottom: 20,
+    padding: 10,
+    alignSelf: "stretch", // Make the container take the full width of the parent
+  },
+  tableRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingVertical: 5,
+  },
+  tableCell: {
+    flex: 1,
+  },
+  tableCellLink: {
+    color: "blue",
+    textDecorationLine: "underline",
+  },
 });
-
 export default EmpleadoSubida;
